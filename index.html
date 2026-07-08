@@ -58,7 +58,6 @@ body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:
   radial-gradient(ellipse 60% 50% at 50% 85%,var(--fuse-soft) 0%,transparent 65%);
   pointer-events:none;opacity:.9}
 .venue{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-strong);background:var(--accent-soft);padding:7px 18px;border-radius:100px;margin-bottom:30px;position:relative}
-.venue .dot{width:6px;height:6px;border-radius:50%;background:var(--listener);box-shadow:0 0 0 4px var(--listener-soft)}
 .hero h1{font-family:var(--display);font-weight:600;line-height:1.14;max-width:940px;margin:0 auto 26px;letter-spacing:-.018em;position:relative;font-size:clamp(28px,2.4vw + 18px,50px)}
 .hero h1 .stream-s{color:var(--speaker)}
 .hero h1 .stream-l{color:var(--listener)}
@@ -190,19 +189,24 @@ p+p{margin-top:15px}
 
 /* ── STANDING ARCHITECTURE DIAGRAM ── */
 .diagram-scroll{overflow-x:auto;padding:8px 0}
-.diagram{position:relative;min-width:940px;height:460px;margin:18px 26px;display:grid;
-  grid-template-columns:150px 160px 200px 160px 170px;
+.diagram{position:relative;min-width:1160px;height:480px;margin:18px 26px;display:grid;
+  grid-template-columns:150px 150px 180px 150px 160px;
+  column-gap:64px;
   align-items:center;justify-items:center}
-.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.wire{fill:none;stroke-width:2.5;stroke-linecap:round;opacity:.28;transition:opacity .4s,stroke-width .4s}
+.wires{position:absolute;left:0;top:0;pointer-events:none;z-index:1;overflow:visible}
+.wire{fill:none;stroke-width:2.5;stroke-linecap:round;opacity:.22;transition:opacity .5s ease,stroke-width .5s ease}
 .wire.w-spk{stroke:var(--speaker)}
 .wire.w-lis{stroke:var(--listener)}
 .wire.w-fuse{stroke:var(--fuse)}
-.wire.dash{stroke-dasharray:5 6;opacity:.2}
-/* animated flowing pulse: stroke-dashoffset animation added via .flow class */
-.wire.flow{opacity:.85;stroke-width:3.5;stroke-dasharray:14 220;animation:flowdash 1.3s linear forwards}
-.wire.dash.flow{stroke-dasharray:5 6;animation:none;opacity:.55}
-@keyframes flowdash{from{stroke-dashoffset:234}to{stroke-dashoffset:0}}
+/* once activated, the whole connector stays a clean solid lit line — this is the trail */
+.wire.lit-wire{opacity:.6;stroke-width:3;stroke-dasharray:none}
+/* a brighter pulse sweeps along the path, then hands off to the solid lit trail */
+.wire.flow{stroke-dasharray:0.14 1;animation:flowdash 1.15s ease-out}
+@keyframes flowdash{
+  0%{stroke-dashoffset:1.14;opacity:.6;stroke-width:3}
+  15%{opacity:1}
+  100%{stroke-dashoffset:0;opacity:.9;stroke-width:3.5}
+}
 /* diagram columns */
 .dcol{position:relative;z-index:2;display:flex;flex-direction:column;gap:26px;align-items:center}
 .dnode{background:var(--surface);border:1.5px solid var(--line-strong);border-radius:14px;box-shadow:var(--shadow-soft);transition:border-color .4s,box-shadow .4s,transform .4s;position:relative}
@@ -249,7 +253,7 @@ p+p{margin-top:15px}
 .dnode.head-node:not(.lit) .hn-metric{color:var(--faint)}
 .dnode.head-node .hn-unit{font-family:var(--mono);font-size:9px;color:var(--faint)}
 /* stage labels row */
-.dstage-labels{position:absolute;left:0;right:0;bottom:-2px;display:grid;grid-template-columns:150px 160px 200px 160px 170px;pointer-events:none}
+.dstage-labels{position:absolute;left:0;right:0;bottom:-2px;display:grid;grid-template-columns:150px 150px 180px 150px 160px;column-gap:64px;pointer-events:none}
 .dstage-labels span{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);text-align:center}
 .speak-wave{height:14px;display:flex;align-items:center;gap:2px}
 .speak-wave span{width:2.5px;background:var(--speaker);border-radius:2px;opacity:.3}
@@ -343,7 +347,7 @@ footer a:hover{text-decoration:underline}
 
 <!-- HERO -->
 <header class="hero">
-  <div class="venue"><span class="dot"></span>Accepted to ICMI 2026 · Napoli, Italy</div>
+  <div class="venue">Accepted to ICMI 2026 · Napoli, Italy</div>
   <h1>Self-Supervised Representation Learning for Heterogeneous Behavioral Expressions of Social Engagement</h1>
   <div class="authors">
     <a href="https://nchappa.github.io" target="_blank" rel="noopener">Naga VS Raviteja Chappa</a><sup>1</sup>,
@@ -422,30 +426,8 @@ footer a:hover{text-decoration:underline}
 
     <div class="diagram-scroll">
     <div class="diagram" id="diagram">
-      <!-- flow wires (SVG behind the boxes) -->
-      <svg class="wires" id="wires" viewBox="0 0 1000 460" preserveAspectRatio="none" aria-hidden="true">
-        <defs>
-          <linearGradient id="gspk" x1="0" x2="1"><stop offset="0" stop-color="var(--speaker)"/><stop offset="1" stop-color="var(--speaker)"/></linearGradient>
-          <linearGradient id="glis" x1="0" x2="1"><stop offset="0" stop-color="var(--listener)"/><stop offset="1" stop-color="var(--listener)"/></linearGradient>
-        </defs>
-        <!-- speaker: input -> backbone -->
-        <path class="wire w-spk" d="M150,120 H250"/>
-        <!-- listener: input -> backbone -->
-        <path class="wire w-lis" d="M150,340 H250"/>
-        <!-- backbone(spk) -> xattn -->
-        <path class="wire w-spk" d="M410,120 C470,120 470,200 520,200"/>
-        <!-- backbone(lis) -> xattn -->
-        <path class="wire w-lis" d="M410,340 C470,340 470,260 520,260"/>
-        <!-- cross exchange arrows inside xattn region (both colors) -->
-        <path class="wire w-spk dash" d="M410,150 C480,180 480,180 520,215"/>
-        <path class="wire w-lis dash" d="M410,310 C480,280 480,280 520,245"/>
-        <!-- xattn -> fused R -->
-        <path class="wire w-fuse" d="M660,230 H740"/>
-        <!-- R -> three heads -->
-        <path class="wire w-fuse" d="M860,230 C900,230 900,110 930,110"/>
-        <path class="wire w-fuse" d="M860,230 H930"/>
-        <path class="wire w-fuse" d="M860,230 C900,230 900,350 930,350"/>
-      </svg>
+      <!-- flow wires: paths generated at runtime from measured node positions -->
+      <svg class="wires" id="wires" aria-hidden="true"></svg>
 
       <!-- INPUT COLUMN -->
       <div class="dcol dcol-input">
@@ -519,16 +501,6 @@ footer a:hover{text-decoration:underline}
     </div>
 
     <div class="viz-note" id="vizNote"></div>
-  </div>
-
-  <!-- real paper figure below the interactive diagram -->
-  <div class="figure fu" style="margin-top:40px">
-    <div class="fig-ph">
-      <div class="phi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-      <div>Paper Figure 1 &mdash; drop the source figure here</div>
-      <div class="phf">assets/architecture.png</div>
-    </div>
-    <div class="figcap"><strong>Figure 1.</strong> The framework as it appears in the paper. (a) Self-supervised pretraining on silence vs. active listening; (b) transfer of the same encoder to three task heads without architectural change.</div>
   </div>
 </div></section>
 
@@ -753,19 +725,75 @@ footer a:hover{text-decoration:underline}
     function tick(now){var p=Math.min((now-start)/dur,1);var e=1-Math.pow(1-p,3);el.textContent=(v*e).toFixed(dec)+suf;if(p<1)requestAnimationFrame(tick);else el.textContent=v.toFixed(dec)+suf;}
     requestAnimationFrame(tick);
   }
-  function flowWires(sel){
-    document.querySelectorAll(sel).forEach(function(w){
-      if(w.classList.contains('dash'))return; // dashed cross arrows stay static-lit
-      w.classList.remove('flow'); void w.getBoundingClientRect(); w.classList.add('flow');
+  var SVGNS='http://www.w3.org/2000/svg';
+  var diagram=document.getElementById('diagram'), wiresSvg=document.getElementById('wires');
+
+  // anchor helpers: point on an edge of a node, in diagram-local coords
+  function edge(node, side){
+    var dr=diagram.getBoundingClientRect();
+    var r=node.getBoundingClientRect();
+    var x,y=r.top-dr.top+r.height/2;
+    if(side==='right')x=r.right-dr.left;
+    else if(side==='left')x=r.left-dr.left;
+    else x=r.left-dr.left+r.width/2;
+    return {x:x, y:y};
+  }
+  function path(a,b,kind){
+    // horizontal-ish cubic bezier from a to b
+    var dx=Math.max(30,(b.x-a.x)*0.5);
+    var d='M'+a.x+','+a.y+' C'+(a.x+dx)+','+a.y+' '+(b.x-dx)+','+b.y+' '+b.x+','+b.y;
+    var p=document.createElementNS(SVGNS,'path');
+    p.setAttribute('d',d);
+    p.setAttribute('pathLength','1');
+    p.setAttribute('class','wire '+kind);
+    return p;
+  }
+  var WIRES=[]; // {el, group} for animation control
+  function drawWires(){
+    // size svg to diagram
+    var dr=diagram.getBoundingClientRect();
+    wiresSvg.setAttribute('width',dr.width);
+    wiresSvg.setAttribute('height',dr.height);
+    wiresSvg.innerHTML='';
+    WIRES=[];
+    var N={
+      spk:document.getElementById('nSpk'), lis:document.getElementById('nLis'),
+      bbS:document.getElementById('nBbS'), bbL:document.getElementById('nBbL'),
+      x:document.getElementById('nX'), r:document.getElementById('nR'),
+      hF:document.getElementById('hFova'), hB:document.getElementById('hBc'), hE:document.getElementById('hEng')
+    };
+    function add(a,b,kind,group){var p=path(a,b,kind);wiresSvg.appendChild(p);WIRES.push({el:p,group:group});}
+    // input -> backbone
+    add(edge(N.spk,'right'), edge(N.bbS,'left'), 'w-spk','in');
+    add(edge(N.lis,'right'), edge(N.bbL,'left'), 'w-lis','in');
+    // backbone -> cross-attention (converge)
+    add(edge(N.bbS,'right'), {x:edge(N.x,'left').x, y:edge(N.x,'left').y-18}, 'w-spk','conv');
+    add(edge(N.bbL,'right'), {x:edge(N.x,'left').x, y:edge(N.x,'left').y+18}, 'w-lis','conv');
+    // cross-attention -> R
+    add(edge(N.x,'right'), edge(N.r,'left'), 'w-fuse','fuse');
+    // R -> three heads (fan out)
+    add(edge(N.r,'right'), edge(N.hF,'left'), 'w-fuse','head');
+    add(edge(N.r,'right'), edge(N.hB,'left'), 'w-fuse','head');
+    add(edge(N.r,'right'), edge(N.hE,'left'), 'w-fuse','head');
+  }
+  function flowGroup(group){
+    WIRES.filter(function(w){return w.group===group;}).forEach(function(w){
+      w.el.classList.add('lit-wire'); // persistent solid trail (stays after pulse)
+      w.el.classList.remove('flow'); void w.el.getBoundingClientRect(); w.el.classList.add('flow'); // sweeping pulse
+      // when the pulse finishes, drop flow so the wire settles into the clean solid lit-wire line
+      w.el.addEventListener('animationend', function onEnd(){
+        w.el.classList.remove('flow');
+        w.el.removeEventListener('animationend', onEnd);
+      });
     });
   }
   function litClass(node,cls){node.classList.add(cls);}
 
   function run(){
     clearTimers();
+    drawWires(); // (re)build connectors against current layout
     // reset all
-    document.querySelectorAll('.wire').forEach(function(w){w.classList.remove('flow');});
-    document.querySelectorAll('.dash').forEach(function(w){w.classList.remove('flow');});
+    document.querySelectorAll('.wire').forEach(function(w){w.classList.remove('flow','lit-wire');});
     document.getElementById('nSpk').classList.remove('lit-spk');
     document.getElementById('nLis').classList.remove('lit-lis');
     ['nBbS','nBbL','nX','nR'].forEach(function(id){document.getElementById(id).classList.remove('lit');});
@@ -773,36 +801,37 @@ footer a:hover{text-decoration:underline}
     setState(curState);
 
     // choreograph the flow left -> right
-    // t0: inputs light + wire to backbone
     tmr.push(setTimeout(function(){
       litClass(document.getElementById('nSpk'),'lit-spk');
       litClass(document.getElementById('nLis'),'lit-lis');
-      flowWires('.w-spk, .w-lis');
+      flowGroup('in');
     },200));
-    // t1: backbones light
     tmr.push(setTimeout(function(){
       document.getElementById('nBbS').classList.add('lit');
       document.getElementById('nBbL').classList.add('lit');
     },900));
-    // t2: flow into cross-attention + exchange arrows glow
     tmr.push(setTimeout(function(){
-      flowWires('path.w-spk[d*="520"], path.w-lis[d*="520"]');
-      document.querySelectorAll('.dash').forEach(function(w){w.classList.add('flow');});
+      flowGroup('conv');
       document.getElementById('nX').classList.add('lit');
     },1500));
-    // t3: flow to fused R
     tmr.push(setTimeout(function(){
-      flowWires('.w-fuse');
+      flowGroup('fuse');
       document.getElementById('nR').classList.add('lit');
     },2300));
-    // t4: heads light one by one + count
     tmr.push(setTimeout(function(){
+      flowGroup('head');
       var heads=[document.getElementById('hFova'),document.getElementById('hBc'),document.getElementById('hEng')];
       heads.forEach(function(h,k){
         tmr.push(setTimeout(function(){h.classList.add('lit');countUp(h.querySelector('.hn-metric'));},k*400));
       });
     },3000));
   }
+
+  // draw once on load so wires are correct even before animation
+  drawWires();
+  // redraw on resize (debounced) — keeps connectors anchored
+  var rzTimer=null;
+  window.addEventListener('resize',function(){clearTimeout(rzTimer);rzTimer=setTimeout(drawWires,150);},{passive:true});
 
   // controls
   document.querySelectorAll('.stbtn').forEach(function(b){
@@ -817,7 +846,7 @@ footer a:hover{text-decoration:underline}
   document.getElementById('replayBtn').addEventListener('click',run);
 
   // kick off when scrolled into view
-  var vo=new IntersectionObserver(function(es){if(es[0].isIntersecting){setTimeout(run,300);vo.disconnect();}},{threshold:.25});
+  var vo=new IntersectionObserver(function(es){if(es[0].isIntersecting){drawWires();setTimeout(run,300);vo.disconnect();}},{threshold:.25});
   vo.observe(root);
 })();
 </script>
